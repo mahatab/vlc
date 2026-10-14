@@ -172,5 +172,81 @@ TracksPage {
                 }
             }
         }
+
+        // Equalizer: the everyday effect, right in the player. The full set of
+        // effects stays one click away in the Effects and Filters window.
+        Widgets.SubtitleLabel {
+            Layout.fillWidth: true
+            Layout.topMargin: VLCStyle.margin_xlarge
+
+            text: qsTr("Equalizer")
+
+            color: root.colorContext.fg.primary
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: VLCStyle.margin_normal
+
+            spacing: VLCStyle.margin_xsmall
+
+            Accessible.role: Accessible.Grouping
+            Accessible.name: qsTr("Equalizer")
+
+            Widgets.MenuCaption {
+                Layout.fillWidth: true
+
+                text: qsTr("Shape the sound with a preset")
+
+                color: root.colorContext.fg.primary
+            }
+
+            Widgets.CheckButton {
+                id: eqSwitch
+
+                checked: Player.isEqualizerEnabled()
+
+                Navigation.parentItem: root
+                Navigation.downItem: eqPresets
+
+                onToggled: Player.setEqualizerEnabled(checked)
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: VLCStyle.margin_xsmall
+
+            spacing: VLCStyle.margin_xsmall
+
+            Widgets.ComboBoxExt {
+                id: eqPresets
+
+                Layout.fillWidth: true
+                Layout.preferredHeight: VLCStyle.combobox_height_normal
+
+                enabled: eqSwitch.checked
+                model: Player.equalizerPresetNames()
+
+                Component.onCompleted: currentIndex = Player.equalizerPresetIndex()
+
+                onActivated: (index) => Player.applyEqualizerPreset(index)
+
+                Navigation.parentItem: root
+                Navigation.upItem: eqSwitch
+                Navigation.rightItem: moreEffects
+            }
+
+            Widgets.ActionButtonOverlay {
+                id: moreEffects
+
+                text: qsTr("More effects…")
+
+                onClicked: DialogsProvider.extendedDialog()
+
+                Navigation.parentItem: root
+                Navigation.leftItem: eqPresets
+            }
+        }
     }
 }

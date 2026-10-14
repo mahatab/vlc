@@ -75,7 +75,10 @@ RowLayout {
 
         Navigation.leftItem: playbackBtn
 
+        // Subtitles and extra video tracks only make sense with video:
+        // hide those columns for audio-only media that has none.
         TrackColumn {
+            visible: Player.hasVideoOutput || Player.subtitleTracks.count > 0
             title: qsTr("Subtitle")
             tracksModel: Player.subtitleTracks
             menuIcon: VLCIcons.expand
@@ -96,6 +99,7 @@ RowLayout {
         }
 
         TrackColumn {
+            visible: Player.hasVideoOutput || Player.videoTracks.count > 0
             title: qsTr("Video Tracks")
             tracksModel: Player.videoTracks
             menuIcon: VLCIcons.add

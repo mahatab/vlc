@@ -69,6 +69,7 @@ private:
     QSplitter *advanced_split_widget;
     QWidget *advanced_tree_panel;
     SearchLineEdit *tree_filter;
+    SearchLineEdit *global_search;
     QCheckBox *current_filter;
     PrefsTree *advanced_tree;
     QStackedWidget *advanced_panels_stack;
@@ -90,6 +91,7 @@ private slots:
     void changeExpertDesc( const QModelIndex &, const QModelIndex & );
     void changeAdvPanel( QTreeWidgetItem * );
     void changeSimplePanel( int );
+    void globalSearchChanged( const QString & );
     void advancedTreeFilterChanged( const QString & );
     void expertTableFilterChanged( const QString & );
     void expertTableFilterModifiedToggled( bool );

@@ -40,11 +40,10 @@
          <string notr="true">color: #838383; </string>
         </property>
         <property name="text">
-         <string notr="true">http://www.example.com/stream.avi
-rtp://@:1234
-mms://mms.examples.com/stream.asx
-rtsp://server.example.org:8080/test.sdp
-http://www.yourtube.com/watch?v=gg64x</string>
+         <string notr="true">https://www.example.com/video.mp4
+https://www.example.com/live/playlist.m3u8
+rtsp://camera.local:554/stream
+udp://@:1234</string>
         </property>
         <property name="margin">
          <number>5</number>

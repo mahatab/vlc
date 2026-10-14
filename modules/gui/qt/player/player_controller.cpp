@@ -33,6 +33,10 @@
 #include <vlc_cxx_helpers.hpp>
 #include <vlc_vout.h>
 #include <vlc_preparser.h>
+#include <vlc_modules.h>        /* module_exists */
+#include <vlc_configuration.h>  /* config_GetPsz, config_PutPsz */
+
+#include "../../../audio_filter/equalizer_presets.h"
 
 #include <QFile>
 #include <QDir>
@@ -1803,6 +1807,79 @@ SharedAOut PlayerController::getAout()
     Q_D(PlayerController);
     vlc_player_locker lock{ d->m_player };
     return SharedAOut( vlc_player_aout_Hold( d->m_player ), false );
+}
+
+// Audio equalizer
+
+QStringList PlayerController::equalizerPresetNames() const
+{
+    QStringList names;
+    for( int i = 0; i < NB_PRESETS; ++i )
+        names << qtr( preset_list_text[i] );
+    return names;
+}
+
+bool PlayerController::isEqualizerEnabled()
+{
+    Q_D(PlayerController);
+    char *filters;
+    if( SharedAOut aout = getAout() )
+        filters = var_GetString( aout.get(), "audio-filter" );
+    else
+        filters = var_InheritString( d->p_intf, "audio-filter" );
+    const bool enabled = filters && strstr( filters, "equalizer" ) != nullptr;
+    free( filters );
+    return enabled;
+}
+
+int PlayerController::equalizerPresetIndex()
+{
+    Q_D(PlayerController);
+    char *preset = nullptr;
+    if( SharedAOut aout = getAout() )
+        preset = var_GetString( aout.get(), "equalizer-preset" );
+    if( !preset || !*preset )
+    {
+        free( preset );
+        preset = var_InheritString( d->p_intf, "equalizer-preset" );
+    }
+    int index = 0; // "Flat"
+    for( int i = 0; preset && i < NB_PRESETS; ++i )
+        if( !strcmp( preset, preset_list[i] ) )
+            index = i;
+    free( preset );
+    return index;
+}
+
+void PlayerController::setEqualizerEnabled( bool enable )
+{
+    Q_D(PlayerController);
+    if( !module_exists( "equalizer" ) )
+        return;
+
+    /* Remember the choice for the next start, like the Effects window does. */
+    char *filters = config_GetPsz( "audio-filter" );
+    QStringList list = QString::fromUtf8( filters ? filters : "" ).split( ':', Qt::SkipEmptyParts );
+    free( filters );
+    list.removeAll( QStringLiteral("equalizer") );
+    if( enable )
+        list << QStringLiteral("equalizer");
+    config_PutPsz( "audio-filter", qtu( list.join( ':' ) ) );
+
+    vlc_player_aout_EnableFilter( d->m_player, "equalizer", enable );
+}
+
+void PlayerController::applyEqualizerPreset( int index )
+{
+    if( index < 0 || index >= NB_PRESETS )
+        return;
+    if( !isEqualizerEnabled() )
+        setEqualizerEnabled( true );
+
+    /* The equalizer applies the preset's levels itself when this changes. */
+    if( SharedAOut aout = getAout() )
+        var_SetString( aout.get(), "equalizer-preset", preset_list[index] );
+    config_PutPsz( "equalizer-preset", preset_list[index] );
 }
 
 void PlayerController::setVolume(float volume)

@@ -129,6 +129,7 @@ void DialogErrorModel::pushError(const DialogError & error)
         lastNotificationText = error.title;
         repeatedNotificationCount = 1;
     }
+    lastNotificationDetail = error.text;
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
     assert(qGuiApp);
@@ -158,6 +159,11 @@ int DialogErrorModel::count() const
 QString DialogErrorModel::notificationText() const
 {
     return lastNotificationText;
+}
+
+QString DialogErrorModel::notificationDetail() const
+{
+    return lastNotificationDetail;
 }
 
 int DialogErrorModel::repeatedMessageCount() const

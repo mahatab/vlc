@@ -201,26 +201,66 @@ Item {
                     Layout.leftMargin: VLCStyle.margin_xxsmall
                 }
 
-                T.Label {
+                // Title on the first line, the actual reason underneath, so the
+                // notice says what went wrong rather than only that something did.
+                Column {
                     id: messageText
 
                     Layout.maximumWidth: root.width * 0.5
                     Layout.leftMargin: VLCStyle.margin_xxsmall
                     Layout.rightMargin: VLCStyle.margin_xxsmall
+                    Layout.topMargin: VLCStyle.margin_xxsmall
+                    Layout.bottomMargin: VLCStyle.margin_xxsmall
 
-                    text: (DialogErrorModel.repeatedMessageCount > 1 ? '[' + DialogErrorModel.repeatedMessageCount + '] ' : '')
-                          + DialogErrorModel.notificationText
+                    spacing: VLCStyle.margin_xxxsmall
 
-                    wrapMode: Text.WrapAnywhere
-                    font.pixelSize: VLCStyle.fontSize_normal
-                    font.bold: true
-                    color: errorMsgTheme.fg.primary
+                    Row {
+                        spacing: VLCStyle.margin_xsmall
+
+                        T.Label {
+                            text: DialogErrorModel.notificationText
+                            font.pixelSize: VLCStyle.fontSize_normal
+                            font.bold: true
+                            color: errorMsgTheme.fg.primary
+                        }
+
+                        // Repeats are grouped into one notice with a small counter.
+                        Rectangle {
+                            visible: DialogErrorModel.repeatedMessageCount > 1
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: repeatLabel.implicitWidth + VLCStyle.margin_small
+                            height: repeatLabel.implicitHeight + VLCStyle.margin_xxxsmall
+                            radius: height / 2
+                            color: Qt.darker(errorMsgTheme.bg.negative, 1.3)
+
+                            T.Label {
+                                id: repeatLabel
+                                anchors.centerIn: parent
+                                text: "×" + DialogErrorModel.repeatedMessageCount
+                                font.pixelSize: VLCStyle.fontSize_small
+                                font.bold: true
+                                color: errorMsgTheme.fg.primary
+                            }
+                        }
+                    }
+
+                    T.Label {
+                        width: Math.min(implicitWidth, root.width * 0.5)
+                        visible: text.length > 0
+                        text: DialogErrorModel.notificationDetail
+                        wrapMode: Text.Wrap
+                        maximumLineCount: 3
+                        elide: Text.ElideRight
+                        font.pixelSize: VLCStyle.fontSize_small
+                        color: errorMsgTheme.fg.primary
+                        opacity: 0.9
+                    }
                 }
 
                 Widgets.TextToolButton {
                     id: detailsBtn
 
-                    text: qsTr("Show Details")
+                    text: qsTr("Details")
 
                     colorContext.colorSet: ColorContext.ButtonAccent
 

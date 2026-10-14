@@ -667,20 +667,50 @@ FocusScope {
                             }
                         }
 
+                        // The track's title (falls back to the file name), so the
+                        // audio view always says what is playing, tags or not.
+                        Widgets.SubtitleLabel {
+                            id: titleLabel
+
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: VLCStyle.margin_xxlarge
+                            Layout.maximumWidth: centerContent.width - VLCStyle.margin_xlarge * 2
+
+                            Binding on visible {
+                                delayed: true
+                                when: titleLabel.componentCompleted
+                                value: Player.title.length > 0 && centerContent.height > (titleLabel.y + titleLabel.height)
+                            }
+
+                            text: Player.title
+                            elide: Text.ElideRight
+                            font.pixelSize: VLCStyle.fontSize_xxlarge
+                            font.weight: Font.DemiBold
+                            horizontalAlignment: Text.AlignHCenter
+                            color: centerTheme.fg.primary
+                            Accessible.description: qsTr("title")
+
+                            property bool componentCompleted: false
+
+                            Component.onCompleted: {
+                                componentCompleted = true
+                            }
+                        }
+
                         Widgets.SubtitleLabel {
                             id: albumLabel
 
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.topMargin: VLCStyle.margin_xxlarge
+                            Layout.topMargin: VLCStyle.margin_small
 
                             Binding on visible {
                                 delayed: true
                                 when: albumLabel.componentCompleted
-                                value: centerContent.height > (albumLabel.y + albumLabel.height)
+                                value: Player.album.length > 0 && centerContent.height > (albumLabel.y + albumLabel.height)
                             }
 
                             text: Player.album
-                            font.pixelSize: VLCStyle.fontSize_xxlarge
+                            font.pixelSize: VLCStyle.fontSize_xlarge
                             horizontalAlignment: Text.AlignHCenter
                             color: centerTheme.fg.primary
                             Accessible.description: qsTr("album")

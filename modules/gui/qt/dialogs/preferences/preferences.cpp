@@ -160,11 +160,23 @@ PrefsDialog::PrefsDialog( QWindow *parent, qt_intf_t *_p_intf )
 
     stack->insertWidget( EXPERT, expert_widget );
 
+    /* One search box for every setting: typing here opens the full list
+     * already filtered, so nothing is only reachable by knowing which view
+     * (Simple, All, Expert) it lives in. */
+    global_search = new SearchLineEdit( this );
+    global_search->setMinimumHeight( 28 );
+    global_search->setPlaceholderText( qtr( "Search all settings" ) );
+    global_search->setToolTip( qtr( "Search every setting by name or description" ) );
+    connect( global_search, &SearchLineEdit::textChanged, this, &PrefsDialog::globalSearchChanged );
+    QShortcut *globalFind = new QShortcut( QKeySequence( QKeySequence::Find ), this );
+    connect( globalFind, &QShortcut::activated, global_search, QOverload<>::of(&SearchLineEdit::setFocus) );
+
     /* Layout  */
-    main_layout->addWidget( stack, 0, 0, 3, 3 );
-    main_layout->addWidget( types, 3, 0, 2, 1 );
-    main_layout->addWidget( buttonsBox, 4, 2, 1 ,1 );
-    main_layout->setRowStretch( 2, 4 );
+    main_layout->addWidget( global_search, 0, 0, 1, 3 );
+    main_layout->addWidget( stack, 1, 0, 3, 3 );
+    main_layout->addWidget( types, 4, 0, 2, 1 );
+    main_layout->addWidget( buttonsBox, 5, 2, 1 ,1 );
+    main_layout->setRowStretch( 3, 4 );
     main_layout->setContentsMargins(9, 9, 9, 9);
 
     switch( var_InheritInteger( p_intf, "qt-initial-prefs-view" ) )
@@ -446,6 +458,18 @@ void PrefsDialog::expertTableFilterModifiedToggled( bool checked )
 void PrefsDialog::expertTableFilterChanged( const QString & text )
 {
     expert_table->filter( text, expert_table_filter_modified->isChecked() );
+}
+
+void PrefsDialog::globalSearchChanged( const QString & text )
+{
+    if( text.isEmpty() )
+        return;
+    /* Searching always happens in the full list ("All"), which covers every
+     * option; the Simple view only shows a curated subset. */
+    if( stack->currentIndex() != ADVANCED )
+        setAdvanced();
+    if( tree_filter && tree_filter->text() != text )
+        tree_filter->setText( text );
 }
 
 void PrefsDialog::advancedTreeFilterChanged( const QString & text )

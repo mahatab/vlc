@@ -350,6 +350,14 @@ public slots:
     Q_INVOKABLE void addSubtitleDelay( VLCDuration );
     void setSecondarySubtitleDelay( VLCDuration );
     Q_INVOKABLE void addSecondarySubtitleDelay( VLCDuration );
+
+    // Audio equalizer, used by the player's Audio panel (the full controls
+    // remain in the Effects and Filters window).
+    Q_INVOKABLE QStringList equalizerPresetNames() const;
+    Q_INVOKABLE bool isEqualizerEnabled();
+    Q_INVOKABLE int equalizerPresetIndex();
+    Q_INVOKABLE void setEqualizerEnabled( bool enable );
+    Q_INVOKABLE void applyEqualizerPreset( int index );
     int getAudioDelayMS() const;
     void setAudioDelayMS( int );
     int getSubtitleDelayMS() const;

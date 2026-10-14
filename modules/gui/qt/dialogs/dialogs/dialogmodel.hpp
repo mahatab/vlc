@@ -64,6 +64,8 @@ class DialogErrorModel : public QAbstractListModel, public Singleton<DialogError
 
     Q_PROPERTY(int count READ count NOTIFY countChanged FINAL)
     Q_PROPERTY(QString notificationText READ notificationText NOTIFY countChanged FINAL)
+    // The reason behind the latest error (its message), shown under the title.
+    Q_PROPERTY(QString notificationDetail READ notificationDetail NOTIFY countChanged FINAL)
     Q_PROPERTY(int repeatedMessageCount READ repeatedMessageCount NOTIFY countChanged FINAL)
 
 public: // Enums
@@ -81,6 +83,7 @@ private:
         QString text;
     };
     QString lastNotificationText;
+    QString lastNotificationDetail;
     int repeatedNotificationCount = 0;
 
 public:
@@ -112,6 +115,7 @@ signals:
 public: // Properties
     int count() const;
     QString notificationText() const;
+    QString notificationDetail() const;
     int repeatedMessageCount() const;
     Q_INVOKABLE void resetRepeatedMessageCount();
 
