@@ -222,6 +222,7 @@ void PrefsDialog::setExpert()
         expert_table->resizeColumnToContents( ExpertPrefsTableModel::NameField );
 
         expert_widget_layout->addWidget( expert_table_filter, 0, 0 );
+        expert_table_filter->hide(); /* the dialog-wide search box drives it */
         expert_widget_layout->addWidget( expert_table_filter_modified, 0, 1 );
         expert_widget_layout->addWidget( expert_table, 1, 0, 1, 2 );
 
@@ -242,6 +243,8 @@ void PrefsDialog::setExpert()
     expert->setChecked( true );
     stack->setCurrentIndex( EXPERT );
     setWindowTitle( qtr( "Expert Preferences" ) );
+    if( global_search && expert_table_filter->text() != global_search->text() )
+        expert_table_filter->setText( global_search->text() );
 }
 
 void PrefsDialog::setAdvanced()
@@ -264,6 +267,7 @@ void PrefsDialog::setAdvanced()
         QShortcut *search = new QShortcut( QKeySequence( QKeySequence::Find ), tree_filter );
 
         advanced_tree_panel->layout()->addWidget( tree_filter );
+        tree_filter->hide(); /* the dialog-wide search box drives it */
         advanced_tree_panel->layout()->addWidget( current_filter );
         advanced_tree_panel->layout()->addWidget( advanced_tree );
         advanced_tree_panel->setSizePolicy( QSizePolicy::Maximum, QSizePolicy::Preferred );
@@ -281,6 +285,8 @@ void PrefsDialog::setAdvanced()
     all->setChecked( true );
     stack->setCurrentIndex( ADVANCED );
     setWindowTitle( qtr( "Advanced Preferences" ) );
+    if( global_search && tree_filter->text() != global_search->text() )
+        tree_filter->setText( global_search->text() );
 }
 
 void PrefsDialog::setSimple()
@@ -462,10 +468,17 @@ void PrefsDialog::expertTableFilterChanged( const QString & text )
 
 void PrefsDialog::globalSearchChanged( const QString & text )
 {
-    if( text.isEmpty() )
+    /* The Expert table has its own list: filter it in place. */
+    if( stack->currentIndex() == EXPERT )
+    {
+        if( expert_table_filter && expert_table_filter->text() != text )
+            expert_table_filter->setText( text );
         return;
-    /* Searching always happens in the full list ("All"), which covers every
-     * option; the Simple view only shows a curated subset. */
+    }
+    /* Otherwise search the full list ("All"), which covers every option; the
+     * Simple view only shows a curated subset. Clearing restores the list. */
+    if( text.isEmpty() && stack->currentIndex() != ADVANCED )
+        return;
     if( stack->currentIndex() != ADVANCED )
         setAdvanced();
     if( tree_filter && tree_filter->text() != text )

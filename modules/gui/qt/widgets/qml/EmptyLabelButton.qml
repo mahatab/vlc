@@ -84,7 +84,7 @@ EmptyLabel {
 
         spacing: VLCStyle.margin_small
 
-        Widgets.ButtonExt {
+        Widgets.ActionButtonPrimary {
             id: button
 
             width: Math.max(VLCStyle.dp(120, VLCStyle.scale), implicitWidth)
