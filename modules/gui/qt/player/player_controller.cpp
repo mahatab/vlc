@@ -1866,6 +1866,24 @@ void PlayerController::setEqualizerEnabled( bool enable )
         list << QStringLiteral("equalizer");
     config_PutPsz( "audio-filter", qtu( list.join( ':' ) ) );
 
+    /* The equalizer refuses to start without a preset: begin from "flat". */
+    if( enable )
+    {
+        char *preset = config_GetPsz( "equalizer-preset" );
+        if( !preset || !*preset )
+        {
+            config_PutPsz( "equalizer-preset", "flat" );
+            if( SharedAOut aout = getAout() )
+            {
+                char *current = var_GetString( aout.get(), "equalizer-preset" );
+                if( !current || !*current )
+                    var_SetString( aout.get(), "equalizer-preset", "flat" );
+                free( current );
+            }
+        }
+        free( preset );
+    }
+
     vlc_player_aout_EnableFilter( d->m_player, "equalizer", enable );
 }
 
