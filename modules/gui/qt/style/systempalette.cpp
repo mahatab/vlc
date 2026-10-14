@@ -448,7 +448,9 @@ void SystemPalette::applyInterfaceStyle(int style)
     };
 
     const auto setAccent = [this](QColor accent, QColor pressed, QColor onAccent) {
-        setColor(C::View, C::Decoration, C::Accent, C::Normal, accent);
+        for (int set = 0; set < VQTC_SET_COUNT; ++set)
+            setColor(static_cast<C::ColorSet>(set), C::Decoration, C::Accent, C::Normal, accent);
+        setColor(C::Slider, C::Fg, C::Primary, C::Normal, accent);
         setColor(C::View, C::Fg, C::Link, C::Normal, accent);
         setColor(C::ButtonAccent, C::Bg, C::Primary, C::Normal, accent);
         setColor(C::ButtonAccent, C::Bg, C::Primary, C::Pressed, pressed);

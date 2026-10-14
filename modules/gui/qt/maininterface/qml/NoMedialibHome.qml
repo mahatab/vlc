@@ -103,8 +103,9 @@ FocusScope {
         Image {
             id: cone
 
-            // the Minimal style keeps the page to text and buttons
-            visible: !VLCStyle.isMinimal
+            // Minimal keeps the page to text and buttons, Cinematic lets the artwork speak
+            // (the big centered cone of an empty library stays in every style)
+            visible: VLCStyle.isFluent || coneNButtons.orientation === Qt.Vertical
             width: visible ? implicitWidth : 0
             height: visible ? implicitHeight : 0
 

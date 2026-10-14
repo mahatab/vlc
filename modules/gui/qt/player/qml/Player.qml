@@ -1335,7 +1335,7 @@ FocusScope {
         topPadding: floatingDock ? VLCStyle.margin_xsmall : 0
         bottomPadding: VLCStyle.applicationVerticalMargin + VLCStyle.margin_xsmall
 
-        textPosition: (MainCtx.pinVideoControls)
+        textPosition: (MainCtx.pinVideoControls || floatingDock)
                       ? ControlBar.TimeTextPosition.LeftRightSlider
                       : ControlBar.TimeTextPosition.AboveSlider
 
