@@ -393,8 +393,8 @@ FocusScope{
         text: root.title
         horizontalAlignment: Text.AlignLeft
         color: theme.fg.primary
-        font.weight: Font.DemiBold
-        font.pixelSize: VLCStyle.dp(18, VLCStyle.scale)
+        font.weight: VLCStyle.isCinematic ? Font.Black : Font.DemiBold
+        font.pixelSize: VLCStyle.dp(VLCStyle.byStyle(18, 28, 18), VLCStyle.scale)
         elide: Text.ElideRight
     }
 

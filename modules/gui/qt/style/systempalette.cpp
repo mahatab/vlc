@@ -377,7 +377,11 @@ void SystemPalette::setCtx(MainCtx* ctx)
 {
     if (ctx == m_ctx)
         return;
+    if (m_ctx)
+        disconnect(m_ctx, &MainCtx::interfaceStyleChanged, this, &SystemPalette::updatePalette);
     m_ctx = ctx;
+    if (m_ctx)
+        connect(m_ctx, &MainCtx::interfaceStyleChanged, this, &SystemPalette::updatePalette);
     emit ctxChanged();
     updatePalette();
 }
@@ -385,7 +389,18 @@ void SystemPalette::setCtx(MainCtx* ctx)
 void SystemPalette::updatePalette()
 {
     m_palettePriv.reset();
-    switch(m_source)
+
+    const MainCtx::InterfaceStyle style = m_ctx ? m_ctx->interfaceStyle()
+                                                : MainCtx::INTERFACE_STYLE_FLUENT;
+
+    // Cinematic is always dark, Minimal is light unless night was asked explicitly
+    ColorSchemeModel::ColorScheme source = m_source;
+    if (style == MainCtx::INTERFACE_STYLE_CINEMATIC)
+        source = ColorSchemeModel::Night;
+    else if (style == MainCtx::INTERFACE_STYLE_MINIMAL && source == ColorSchemeModel::System)
+        source = ColorSchemeModel::Day;
+
+    switch(source)
     {
     case ColorSchemeModel::System:
         makeSystemPalette();
@@ -399,6 +414,8 @@ void SystemPalette::updatePalette()
     default:
         break;
     }
+
+    applyInterfaceStyle(style);
 
     if (m_palettePriv)
     {
@@ -416,6 +433,62 @@ void SystemPalette::updatePalette()
     {
         m_hasCSDImage = hasCSDImage;
         emit hasCSDImageChanged();
+    }
+}
+
+void SystemPalette::applyInterfaceStyle(int style)
+{
+    typedef ColorContext C;
+
+    const auto setBackgrounds = [this](QColor content, QColor window) {
+        setColor(C::View, C::Bg, C::Primary, C::Normal, content);
+        setColor(C::View, C::Bg, C::Secondary, C::Normal, window);
+        setColor(C::Window, C::Bg, C::Primary, C::Normal, window);
+        setColor(C::Window, C::Bg, C::Secondary, C::Normal, window);
+    };
+
+    const auto setAccent = [this](QColor accent, QColor pressed, QColor onAccent) {
+        setColor(C::View, C::Decoration, C::Accent, C::Normal, accent);
+        setColor(C::View, C::Fg, C::Link, C::Normal, accent);
+        setColor(C::ButtonAccent, C::Bg, C::Primary, C::Normal, accent);
+        setColor(C::ButtonAccent, C::Bg, C::Primary, C::Pressed, pressed);
+        setColor(C::ButtonAccent, C::Fg, C::Primary, C::Normal, onAccent);
+        setColor(C::Switch, C::Bg, C::Secondary, C::Normal, accent);
+    };
+
+    switch (style)
+    {
+    case MainCtx::INTERFACE_STYLE_CINEMATIC:
+        // near black, so artwork and video carry the color
+        setBackgrounds(QColor("#0d0d10"), QColor("#07070a"));
+        setColor(C::View, C::Decoration, C::Separator, C::Normal, QColor("#1c1c22"));
+        setColor(C::Item, C::Bg, C::Primary, C::Hovered, setColorAlpha(Qt::white, 0.08));
+        setColor(C::Item, C::Bg, C::Primary, C::Focused, setColorAlpha(Qt::white, 0.08));
+        setAccent(QColor("#ff8a1a"), QColor("#e67a10"), Qt::black);
+        break;
+
+    case MainCtx::INTERFACE_STYLE_MINIMAL:
+        if (m_isDark)
+            break; // keep the night palette (used over the video)
+        // warm paper white with charcoal accents
+        setBackgrounds(QColor("#fbfaf8"), QColor("#f4f2ee"));
+        setColor(C::View, C::Fg, C::Primary, C::Normal, QColor("#1d1d1b"));
+        setColor(C::View, C::Fg, C::Secondary, C::Normal, QColor("#7a766e"));
+        setColor(C::View, C::Decoration, C::Separator, C::Normal, QColor("#ece9e3"));
+        setColor(C::Item, C::Bg, C::Primary, C::Hovered, QColor("#efece6"));
+        setColor(C::Item, C::Bg, C::Primary, C::Focused, QColor("#efece6"));
+        setColor(C::Item, C::Bg, C::Highlight, C::Normal, QColor("#e7e3db"));
+        setAccent(QColor("#1d1d1b"), QColor("#3a3833"), Qt::white);
+        break;
+
+    case MainCtx::INTERFACE_STYLE_FLUENT:
+    default:
+        // Windows 11 "Mica" layering: a darker window behind a lighter content card
+        if (m_isDark)
+            setBackgrounds(QColor("#272727"), QColor("#1c1c1c"));
+        else
+            setBackgrounds(QColor("#fbfbfb"), QColor("#f0f0f0"));
+        break;
     }
 }
 

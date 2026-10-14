@@ -171,6 +171,7 @@ private:
     void makeLightPalette();
     void makeDarkPalette();
     void makeSystemPalette();
+    void applyInterfaceStyle(int style);
 
 private:
     MainCtx* m_ctx = nullptr;

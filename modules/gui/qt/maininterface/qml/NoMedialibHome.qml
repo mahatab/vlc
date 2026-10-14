@@ -92,7 +92,7 @@ FocusScope {
                 PropertyChanges {
                     target: buttons
 
-                    anchors.leftMargin: coneNButtons.spacing
+                    anchors.leftMargin: cone.visible ? coneNButtons.spacing : 0
                 }
             }
         ]
@@ -102,6 +102,11 @@ FocusScope {
 
         Image {
             id: cone
+
+            // the Minimal style keeps the page to text and buttons
+            visible: !VLCStyle.isMinimal
+            width: visible ? implicitWidth : 0
+            height: visible ? implicitHeight : 0
 
             property real _eDPR: MainCtx.effectiveDevicePixelRatio(Window.window)
 

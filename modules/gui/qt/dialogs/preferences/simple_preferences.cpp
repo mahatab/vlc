@@ -835,6 +835,23 @@ SPrefsPanel::SPrefsPanel( qt_intf_t *_p_intf, QWidget *_parent,
             QObject::connect( ui.colorSchemeComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged)
                               , p_intf->p_mi->getColorScheme(), &ColorSchemeModel::setCurrentIndex );
 
+            /* Interface style: applied right away, like the color scheme */
+            ui.interfaceStyleCombo->addItem( qtr( "Windows 11" ), MainCtx::INTERFACE_STYLE_FLUENT );
+            ui.interfaceStyleCombo->addItem( qtr( "Cinematic" ), MainCtx::INTERFACE_STYLE_CINEMATIC );
+            ui.interfaceStyleCombo->addItem( qtr( "Minimal" ), MainCtx::INTERFACE_STYLE_MINIMAL );
+            ui.interfaceStyleCombo->setCurrentIndex(
+                ui.interfaceStyleCombo->findData( p_intf->p_mi->interfaceStyle() ) );
+            m_resetters.push_back(std::make_unique<PropertyResetter>( ui.interfaceStyleCombo, "currentIndex" ));
+            QObject::connect( ui.interfaceStyleCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+                              p_intf->p_mi, [combo = ui.interfaceStyleCombo, pin = ui.pinVideoControlsCheckbox,
+                                             mi = p_intf->p_mi]( int index ) {
+                if ( index < 0 )
+                    return;
+                mi->setInterfaceStyle( static_cast<MainCtx::InterfaceStyle>( combo->itemData( index ).toInt() ) );
+                /* the style also decides whether the controls stay pinned */
+                pin->setChecked( mi->pinVideoControls() );
+            } );
+
             const double intfScaleFloatFactor = 100;
             const auto updateIntfUserScaleFactorFromControls =
                     [this, slider = ui.intfScaleFactorSlider, spinBox = ui.intfScaleFactorSpinBox, intfScaleFloatFactor](const int value)

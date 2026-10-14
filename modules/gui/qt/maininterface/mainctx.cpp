@@ -453,6 +453,18 @@ void MainCtx::loadPrefs(const bool callSignals)
 
     loadFromVLCOption(m_pinOpacity, "qt-fs-opacity", &MainCtx::pinOpacityChanged);
 
+    {
+        const int style = var_InheritInteger(p_intf, "qt-interface-style");
+        const auto interfaceStyle = (style == INTERFACE_STYLE_CINEMATIC || style == INTERFACE_STYLE_MINIMAL)
+                                  ? static_cast<InterfaceStyle>(style) : INTERFACE_STYLE_FLUENT;
+        if (interfaceStyle != m_interfaceStyle)
+        {
+            m_interfaceStyle = interfaceStyle;
+            if (callSignals)
+                emit interfaceStyleChanged();
+        }
+    }
+
     loadFromVLCOption(m_safeArea, "qt-safe-area", &MainCtx::safeAreaChanged);
 
     loadFromVLCOption(m_mouseHideTimeout, "mouse-hide-timeout", &MainCtx::mouseHideTimeoutChanged);
@@ -623,6 +635,25 @@ void MainCtx::setPinVideoControls(bool pinVideoControls)
 
     m_pinVideoControls = pinVideoControls;
     emit pinVideoControlsChanged();
+}
+
+void MainCtx::setInterfaceStyle(InterfaceStyle interfaceStyle)
+{
+    if (m_interfaceStyle == interfaceStyle)
+        return;
+
+    m_interfaceStyle = interfaceStyle;
+    config_PutInt("qt-interface-style", interfaceStyle);
+
+    /* each style comes with its own way of showing things: Minimal uses
+     * plain lists and keeps the player controls below the video, the
+     * others use artwork grids and controls floating over the video */
+    const bool minimal = (interfaceStyle == INTERFACE_STYLE_MINIMAL);
+    setGridView(!minimal);
+    setPinVideoControls(minimal);
+    config_PutInt("qt-pin-controls", minimal);
+
+    emit interfaceStyleChanged();
 }
 
 void MainCtx::setPinOpacity(float pinOpacity)

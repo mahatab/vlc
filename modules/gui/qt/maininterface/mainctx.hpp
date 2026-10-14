@@ -120,6 +120,7 @@ class MainCtx : public QObject
     Q_PROPERTY(bool hasToolbarMenu READ hasToolbarMenu WRITE setHasToolbarMenu NOTIFY hasToolbarMenuChanged FINAL)
     Q_PROPERTY(bool canShowVideoPIP READ canShowVideoPIP CONSTANT FINAL)
     Q_PROPERTY(bool pinVideoControls READ pinVideoControls WRITE setPinVideoControls NOTIFY pinVideoControlsChanged FINAL)
+    Q_PROPERTY(InterfaceStyle interfaceStyle READ interfaceStyle WRITE setInterfaceStyle NOTIFY interfaceStyleChanged FINAL)
     Q_PROPERTY(float pinOpacity READ pinOpacity WRITE setPinOpacity NOTIFY pinOpacityChanged FINAL)
     Q_PROPERTY(ControlbarProfileModel* controlbarProfileModel READ controlbarProfileModel CONSTANT FINAL)
     Q_PROPERTY(bool hasAcrylicSurface READ hasAcrylicSurface NOTIFY hasAcrylicSurfaceChanged FINAL)
@@ -202,6 +203,15 @@ public:
     };
     Q_ENUM(Grouping)
 
+    // the overall look of the interface, see the "qt-interface-style" option
+    enum InterfaceStyle
+    {
+        INTERFACE_STYLE_FLUENT,
+        INTERFACE_STYLE_CINEMATIC,
+        INTERFACE_STYLE_MINIMAL
+    };
+    Q_ENUM(InterfaceStyle)
+
     enum OsType
     {
         Windows,
@@ -248,6 +258,7 @@ public:
     inline void setCanShowVideoPIP(bool canShowVideoPIP) { m_canShowVideoPIP = canShowVideoPIP; }
 
     inline bool pinVideoControls() const { return m_pinVideoControls; }
+    inline InterfaceStyle interfaceStyle() const { return m_interfaceStyle; }
     inline float pinOpacity() const { return m_pinOpacity; }
 
     inline ControlbarProfileModel* controlbarProfileModel() const { return m_controlbarProfileModel; }
@@ -462,6 +473,7 @@ protected:
 
     /* Pinned */
     bool                 m_pinVideoControls = false;
+    InterfaceStyle       m_interfaceStyle = INTERFACE_STYLE_FLUENT;
     float                m_pinOpacity       = 1.0f;
 
     bool                 m_useGlobalShortcuts = true;
@@ -531,6 +543,7 @@ public slots:
     void setHasToolbarMenu( bool );
 
     void setPinVideoControls( bool );
+    void setInterfaceStyle( InterfaceStyle );
     void setPinOpacity( float );
 
     void setbgCone(bool);
@@ -592,6 +605,7 @@ signals:
     void intfDevicePixelRatioChanged();
 
     void pinVideoControlsChanged();
+    void interfaceStyleChanged();
     void pinOpacityChanged();
 
     void hasAcrylicSurfaceChanged(bool);

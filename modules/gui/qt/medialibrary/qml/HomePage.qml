@@ -79,10 +79,10 @@ Widgets.PageExt {
         id: flickable
 
         implicitWidth: Math.max(coneNButtons.implicitWidth, mediaRows.implicitWidth)
-        implicitHeight: coneNButtons.implicitHeight + (_hasMedias ? mediaRows.implicitHeight : 0)
+        implicitHeight: hero.height + coneNButtons.implicitHeight + (_hasMedias ? mediaRows.implicitHeight : 0)
 
         contentWidth: width
-        contentHeight: _hasMedias ? coneNButtons.implicitHeight + mediaRows.implicitHeight
+        contentHeight: _hasMedias ? hero.height + coneNButtons.implicitHeight + mediaRows.implicitHeight
                                   : height - topMargin - bottomMargin
 
         flickableDirection: Flickable.AutoFlickIfNeeded
@@ -153,6 +153,102 @@ Widgets.PageExt {
             // jumps when it is enabled again later on.
         }
 
+        // Cinematic style: a large banner for the video to resume
+        Item {
+            id: hero
+
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            visible: VLCStyle.isCinematic && flickable._hasMedias && heroModel.count > 0
+            height: visible ? Math.round(Math.min(Math.max(flickable.width * 0.36, VLCStyle.dp(260)), VLCStyle.dp(420)))
+                            : 0
+            clip: true
+
+            Repeater {
+                model: MLRecentVideoModel {
+                    id: heroModel
+
+                    ml: MediaLib
+                    limit: 1
+                }
+
+                delegate: Item {
+                    anchors.fill: parent
+
+                    Image {
+                        anchors.fill: parent
+                        source: model.thumbnail || VLCStyle.noArtVideoCover
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
+                        sourceSize.width: width
+                    }
+
+                    // fade the picture into the page so the text stays readable
+                    Rectangle {
+                        anchors.fill: parent
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop { position: 0.0; color: Qt.alpha(theme.bg.primary, 0.95) }
+                            GradientStop { position: 0.45; color: Qt.alpha(theme.bg.primary, 0.6) }
+                            GradientStop { position: 0.8; color: Qt.alpha(theme.bg.primary, 0.0) }
+                        }
+                    }
+
+                    Rectangle {
+                        anchors.fill: parent
+                        gradient: Gradient {
+                            GradientStop { position: 0.55; color: Qt.alpha(theme.bg.primary, 0.0) }
+                            GradientStop { position: 1.0; color: theme.bg.primary }
+                        }
+                    }
+
+                    Column {
+                        anchors.left: parent.left
+                        anchors.leftMargin: newVideoRow.contentLeftMargin
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: Math.min(parent.width * 0.55, VLCStyle.dp(560))
+                        spacing: VLCStyle.margin_small
+
+                        Text {
+                            text: qsTr("CONTINUE WATCHING")
+                            color: theme.accent
+                            font.pixelSize: VLCStyle.fontSize_normal
+                            font.weight: Font.DemiBold
+                            font.letterSpacing: VLCStyle.dp(2)
+                        }
+
+                        Text {
+                            width: parent.width
+                            text: model.title || qsTr("Unknown title")
+                            color: theme.fg.primary
+                            font.pixelSize: VLCStyle.dp(44)
+                            font.weight: Font.Black
+                            elide: Text.ElideRight
+                            maximumLineCount: 2
+                            wrapMode: Text.Wrap
+                            lineHeight: 0.95
+                        }
+
+                        Text {
+                            visible: (model.progress ?? 0) > 0
+                            text: qsTr("%1% watched").arg(Math.round(model.progress * 100))
+                            color: theme.fg.secondary
+                            font.pixelSize: VLCStyle.fontSize_large
+                        }
+
+                        Item { width: 1; height: VLCStyle.margin_xxsmall }
+
+                        Widgets.ActionButtonPrimary {
+                            text: qsTr("Resume")
+                            onClicked: MediaLib.addAndPlay(model.id)
+                        }
+                    }
+                }
+            }
+        }
+
         NoMedialibHome.ConeNButtons {
             id: coneNButtons
 
@@ -161,7 +257,7 @@ Widgets.PageExt {
             orientation: flickable._hasMedias ? Qt.Horizontal : Qt.Vertical
 
             anchors.centerIn: flickable._hasMedias ? undefined : parent
-            anchors.top: flickable._hasMedias ? parent.top : undefined
+            anchors.top: flickable._hasMedias ? hero.bottom : undefined
             anchors.left: flickable._hasMedias ? parent.left : undefined
             anchors.leftMargin: flickable._hasMedias ? newVideoRow.contentLeftMargin : 0
 

@@ -1312,18 +1312,27 @@ FocusScope {
     ControlBar {
         id: controlBar
 
+        // Windows 11 style: the controls float over the video in a rounded, translucent card
+        readonly property bool floatingDock: VLCStyle.isFluent && MainCtx.hasEmbededVideo
+                                             && !rootPlayer._controlsUnderVideo
+
         anchors {
             bottom: parent.bottom
             left: parent.left
             right: parent.right
+
+            bottomMargin: floatingDock ? VLCStyle.margin_normal : 0
+            leftMargin: floatingDock ? Math.max(VLCStyle.margin_large, (rootPlayer.width - VLCStyle.dp(960)) / 2) : 0
+            rightMargin: anchors.leftMargin
         }
 
         hoverEnabled: true
 
         focus: true
 
-        rightPadding: VLCStyle.applicationHorizontalMargin
-        leftPadding: VLCStyle.applicationHorizontalMargin
+        rightPadding: VLCStyle.applicationHorizontalMargin + (floatingDock ? VLCStyle.margin_small : 0)
+        leftPadding: VLCStyle.applicationHorizontalMargin + (floatingDock ? VLCStyle.margin_small : 0)
+        topPadding: floatingDock ? VLCStyle.margin_xsmall : 0
         bottomPadding: VLCStyle.applicationVerticalMargin + VLCStyle.margin_xsmall
 
         textPosition: (MainCtx.pinVideoControls)
@@ -1366,10 +1375,16 @@ FocusScope {
         background: Rectangle {
             id: controlBarBackground
 
-            visible: !MainCtx.hasEmbededVideo || MainCtx.pinVideoControls || !rootPlayer.displayFadeRectangles
+            visible: controlBar.floatingDock || !MainCtx.hasEmbededVideo || MainCtx.pinVideoControls || !rootPlayer.displayFadeRectangles
+
+            radius: controlBar.floatingDock ? VLCStyle.dp(12) : 0
+            border.width: controlBar.floatingDock ? VLCStyle.border : 0
+            border.color: Qt.rgba(1, 1, 1, 0.12)
 
             opacity: {
-                if (MainCtx.hasEmbededVideo && !MainCtx.pinVideoControls && !rootPlayer.displayFadeRectangles) {
+                if (controlBar.floatingDock) {
+                    return 0.88
+                } else if (MainCtx.hasEmbededVideo && !MainCtx.pinVideoControls && !rootPlayer.displayFadeRectangles) {
                     return 0.6
                 } else if ((Window.visibility === Window.FullScreen) && MainCtx.hasEmbededVideo) {
                     return MainCtx.pinOpacity

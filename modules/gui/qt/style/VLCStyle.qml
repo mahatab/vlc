@@ -26,6 +26,17 @@ QtObject {
 
     readonly property real scale: MainCtx.intfScaleFactor
 
+    // Interface style (Settings > Interface > Interface style)
+    readonly property int interfaceStyle: MainCtx.interfaceStyle
+    readonly property bool isFluent: interfaceStyle === MainCtx.INTERFACE_STYLE_FLUENT
+    readonly property bool isCinematic: interfaceStyle === MainCtx.INTERFACE_STYLE_CINEMATIC
+    readonly property bool isMinimal: interfaceStyle === MainCtx.INTERFACE_STYLE_MINIMAL
+
+    // pick a value for the current style
+    function byStyle(fluent, cinematic, minimal) {
+        return isCinematic ? cinematic : (isMinimal ? minimal : fluent)
+    }
+
     readonly property FontMetrics fontMetrics_xxsmall  : FontMetrics { font.pixelSize: MainCtx.dp(6, scale);  }
     readonly property FontMetrics fontMetrics_xsmall   : FontMetrics { font.pixelSize: MainCtx.dp(8, scale);  }
     readonly property FontMetrics fontMetrics_small    : FontMetrics { font.pixelSize: MainCtx.dp(10, scale); }
@@ -33,7 +44,7 @@ QtObject {
     readonly property FontMetrics fontMetrics_large    : FontMetrics { font.pixelSize: MainCtx.dp(14, scale); }
     readonly property FontMetrics fontMetrics_xlarge   : FontMetrics { font.pixelSize: MainCtx.dp(16, scale); }
     readonly property FontMetrics fontMetrics_xxlarge  : FontMetrics { font.pixelSize: MainCtx.dp(20, scale); }
-    readonly property FontMetrics fontMetrics_xxxlarge : FontMetrics { font.pixelSize: MainCtx.dp(24, scale); }
+    readonly property FontMetrics fontMetrics_xxxlarge : FontMetrics { font.pixelSize: MainCtx.dp(byStyle(24, 30, 22), scale); }
 
     readonly property SystemPalette palette:  SystemPalette {
         objectName: "themePalette"
@@ -92,13 +103,13 @@ QtObject {
 
     readonly property int listAlbumCover_height: MainCtx.dp(32, scale)
     readonly property int listAlbumCover_width: listAlbumCover_height * 16.0/9
-    readonly property int listAlbumCover_radius: MainCtx.dp(3, scale)
+    readonly property int listAlbumCover_radius: MainCtx.dp(byStyle(4, 6, 2), scale)
     readonly property int trackListAlbumCover_width: MainCtx.dp(32, scale)
     readonly property int trackListAlbumCover_heigth: MainCtx.dp(32, scale)
     readonly property int trackListAlbumCover_radius: MainCtx.dp(3, scale)
 
     readonly property int tableCoverRow_height: Math.max(listAlbumCover_height, fontHeight_normal) + margin_xsmall * 2
-    readonly property int tableRow_height: fontHeight_normal + margin_small * 2
+    readonly property int tableRow_height: fontHeight_normal + byStyle(margin_small, margin_small, margin_normal) * 2
 
     readonly property int icon_xsmall: MainCtx.dp(8, scale);
     readonly property int icon_small: MainCtx.dp(12, scale);
@@ -116,7 +127,7 @@ QtObject {
     readonly property int icon_tableHeader: icon_normal
     readonly property int icon_playlistHeader: icon_normal
     readonly property int icon_banner: MainCtx.dp(28, scale)
-    readonly property int icon_play: MainCtx.dp(28, scale)
+    readonly property int icon_play: MainCtx.dp(byStyle(28, 36, 24), scale)
     readonly property int icon_addressBar: icon_normal
     readonly property int icon_actionButton: icon_normal
     readonly property int icon_PIP: icon_normal
@@ -175,7 +186,7 @@ QtObject {
     readonly property int button_width_normal: MainCtx.dp(96, scale)
     readonly property int button_width_large: MainCtx.dp(128, scale)
 
-    readonly property real button_radius: MainCtx.dp(4, scale)
+    readonly property real button_radius: MainCtx.dp(byStyle(4, 6, 2), scale)
 
     readonly property int contextButton_width: icon_normal
     readonly property int contextButton_margin: margin_xxsmall
@@ -186,7 +197,7 @@ QtObject {
     readonly property int checkButton_margins: MainCtx.dp(4, scale)
     readonly property int checkButton_handle_margins: MainCtx.dp(2, scale)
 
-    readonly property int navBoxButton_radius: MainCtx.dp(8, scale)
+    readonly property int navBoxButton_radius: MainCtx.dp(byStyle(8, 10, 2), scale)
 
     readonly property int table_section_width: MainCtx.dp(32, scale)
     readonly property int table_section_text_margin: MainCtx.dp(10, scale)
@@ -203,7 +214,7 @@ QtObject {
     readonly property int gridCover_video_height: ( gridCover_video_width * 10.0 ) / 16
     readonly property int gridCover_video_border: MainCtx.dp(4, scale)
 
-    readonly property int gridCover_radius: MainCtx.dp(4, scale)
+    readonly property int gridCover_radius: MainCtx.dp(byStyle(8, 10, 2), scale)
 
     readonly property int expandCover_music_height: MainCtx.dp(171, scale)
     readonly property int expandCover_music_width: MainCtx.dp(171, scale)
@@ -212,7 +223,7 @@ QtObject {
 
     readonly property int artistGridCover_radius: MainCtx.dp(90, scale)
 
-    readonly property real mainView_topLeftRadius: MainCtx.dp(8, scale)
+    readonly property real mainView_topLeftRadius: MainCtx.dp(byStyle(8, 0, 0), scale)
 
     //GridItem
     readonly property int gridItemTitle_topMargin: margin_xsmall + margin_xxxsmall
@@ -225,7 +236,7 @@ QtObject {
 
     readonly property int gridItem_newIndicator: MainCtx.dp(8, scale)
 
-    readonly property int column_width: MainCtx.dp(114, scale)
+    readonly property int column_width: MainCtx.dp(byStyle(114, 150, 114), scale)
 
     // NOTE: This property should be applied on ExpandGridView and TableView. We should provision
     //       enough space to fit the TableView section labels and 'contextButton'.
@@ -324,7 +335,7 @@ QtObject {
     readonly property int controlBarBookmarksHeight: icon_xsmall * 0.9
 
     // Player control layout
-    readonly property int controlLayoutHeight: MainCtx.dp(64, scale)
+    readonly property int controlLayoutHeight: MainCtx.dp(byStyle(64, 76, 48), scale)
     readonly property int controlLayoutHeightPinned: MainCtx.dp(32, scale)
 
     // Scroll bar (size means width or height, depending on the orientation):

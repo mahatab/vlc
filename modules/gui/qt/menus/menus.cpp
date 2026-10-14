@@ -353,6 +353,25 @@ void VLCMenuBar::ViewMenu(qt_intf_t *p_intf, QMenu *menu)
 
     menu->addMenu( new CheckableListMenu(qtr( "&Color Scheme" ), mi->getColorScheme(), QActionGroup::ExclusionPolicy::Exclusive, menu) );
 
+    {
+        QMenu *styleMenu = menu->addMenu( qtr( "Interface &Style" ) );
+        QActionGroup *styleGroup = new QActionGroup( styleMenu );
+        const struct { const char *name; MainCtx::InterfaceStyle style; } styles[] = {
+            { N_( "Windows 11" ), MainCtx::INTERFACE_STYLE_FLUENT },
+            { N_( "Cinematic" ),  MainCtx::INTERFACE_STYLE_CINEMATIC },
+            { N_( "Minimal" ),    MainCtx::INTERFACE_STYLE_MINIMAL },
+        };
+        for( const auto &entry : styles )
+        {
+            QAction *styleAction = styleMenu->addAction( qtr( entry.name ) );
+            styleAction->setCheckable( true );
+            styleAction->setChecked( mi->interfaceStyle() == entry.style );
+            styleGroup->addAction( styleAction );
+            const MainCtx::InterfaceStyle style = entry.style;
+            connect( styleAction, &QAction::triggered, mi, [mi, style]() { mi->setInterfaceStyle( style ); } );
+        }
+    }
+
     menu->addSeparator();
 
     InterfacesMenu( p_intf, menu );
