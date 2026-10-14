@@ -283,7 +283,8 @@ public:
             m_model.children.push_back(std::move(musicEntry));
         }
 
-        m_model.children.emplace_back(qtr("Browse"), "network", VLCIcons::topbar_network, QStringLiteral(":/icons/ic_fluent_wifi_1.svg"));
+        // Browse lists local folders first, so it gets a folder icon (Wi-Fi suggested network only).
+        m_model.children.emplace_back(qtr("Browse"), "network", VLCIcons::folder, QStringLiteral(":/icons/folder.svg"));
 
         ModelEntry discoverEntry{ qtr("Discover"), "discover", VLCIcons::topbar_discover, QStringLiteral(":/icons/ic_fluent_globe.svg") };
         discoverEntry.children.emplace_back(qtr("Services"), "services");

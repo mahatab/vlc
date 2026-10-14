@@ -61,6 +61,12 @@ public:
 
     Q_INVOKABLE void reload();
 
+    // Asks the user for a folder and adds it to the library (empty states, first run).
+    // Returns false when the user cancelled.
+    Q_INVOKABLE bool addFolderFromDialog();
+    // Adds a known folder (e.g. the user's Videos or Music folder) to the library.
+    Q_INVOKABLE void addFolder(const QUrl& folder);
+
     Q_INVOKABLE void mlInputItem(const QVector<MLItemId>& itemIdVector, QJSValue callback);
 
     inline bool idle() const { return m_idle; }

@@ -676,6 +676,13 @@ QUrl MainCtx::folderMRL(const QUrl &fileMRL) const
     return {};
 }
 
+bool MainCtx::addFolderToLibrary()
+{
+    if (!m_medialib)
+        return false;
+    return m_medialib->addFolderFromDialog();
+}
+
 QString MainCtx::displayMRL(const QUrl &mrl) const
 {
     return urlToDisplayString(mrl);
@@ -1277,6 +1284,12 @@ UpdateModel* MainCtx::getUpdateModel() const
                 case UpdateModel::UpToDate:
                 case UpdateModel::Unchecked:
                 case UpdateModel::Checking:
+                    break;
+                case UpdateModel::CheckFailed:
+                    // An automatic background check that fails (offline, development
+                    // build, server down) is not something the user can act on:
+                    // log it instead of opening a dialog at launch.
+                    qDebug("Automatic update check failed; not interrupting the user.");
                     break;
                 case UpdateModel::NeedUpdate:
                     qWarning() << "Need update";

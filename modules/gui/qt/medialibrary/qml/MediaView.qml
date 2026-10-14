@@ -164,7 +164,7 @@ MainViewLoader {
                 fallbackImage: model.isVideo ? VLCStyle.noArtVideoCover : VLCStyle.noArtAlbumCover
 
                 title: model.title || qsTr("Unknown Title")
-                subtitle: model.duration?.formatHMS() ?? "--:--"
+                subtitle: (model.duration?.valid() ?? false) ? model.duration.formatHMS() : ""
 
                 opacity: gridView.expandIndex !== -1 && gridView.expandIndex !== index ? 0.7 : 1
 
@@ -314,7 +314,7 @@ MainViewLoader {
 
             cover: VLCStyle.noArtAlbumCover // TODO: better fallback image
 
-            text: qsTr("No media found\nPlease try adding sources")
+            text: qsTr("Nothing here yet\nAdd a folder and VLC will find your media")
 
             Navigation.parentItem: root
         }

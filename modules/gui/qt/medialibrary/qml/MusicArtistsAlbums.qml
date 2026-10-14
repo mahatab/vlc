@@ -326,7 +326,7 @@ Widgets.PageExt {
 
         visible: !artistModel.loading && (artistModel.count <= 0)
         focus: visible
-        text: qsTr("No artists found\nPlease try adding sources")
+        text: qsTr("No artists yet\nAdd your music folder to fill your library")
         Navigation.parentItem: root
     }
 }

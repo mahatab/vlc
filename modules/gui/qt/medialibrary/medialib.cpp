@@ -24,6 +24,8 @@
 #include <utility>
 
 #include <QQmlEngine>
+#include <QFileDialog>
+#include <QStandardPaths>
 
 MediaLib::MediaLib(qt_intf_t *_intf, vlc::playlist::PlaylistController* playlistController, QObject *_parent)
     : QObject( _parent )
@@ -245,6 +247,29 @@ void MediaLib::reload()
     [](vlc_medialibrary_t* ml){
         vlc_ml_reload_folder(ml, nullptr);
     });
+}
+
+void MediaLib::addFolder(const QUrl& folder)
+{
+    if (!folder.isValid() || folder.isEmpty())
+        return;
+    const QByteArray mrl = folder.toString(QUrl::FullyEncoded).toUtf8();
+    runOnMLThread(this,
+    //ML thread
+    [mrl](vlc_medialibrary_t* ml){
+        vlc_ml_add_folder(ml, mrl.constData());
+    });
+}
+
+bool MediaLib::addFolderFromDialog()
+{
+    const QUrl folder = QFileDialog::getExistingDirectoryUrl(
+        nullptr, qtr("Add a folder to your library"),
+        QUrl::fromLocalFile(QStandardPaths::writableLocation(QStandardPaths::MoviesLocation)));
+    if (folder.isEmpty())
+        return false;
+    addFolder(folder);
+    return true;
 }
 
 void MediaLib::mlInputItem(const QVector<MLItemId>& itemIdVector, QJSValue callback)

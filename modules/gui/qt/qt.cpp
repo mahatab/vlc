@@ -52,6 +52,8 @@ extern "C" char **environ;
 #endif
 
 #include <QApplication>
+#include <QColor>
+#include <QPalette>
 #include <QDate>
 #include <QMutex>
 #include <QtQuickControls2/QQuickStyle>
@@ -1462,6 +1464,34 @@ static void *Thread( void *obj )
         }
     }
 #undef QTSTYLE_KEY
+
+    /* Give the classic (Qt Widgets) dialogs VLC's accent instead of the
+     * operating system's, so they match the main interface. A user who picked
+     * the system accent in the preferences keeps it. */
+    {
+        char *accent = var_InheritString( p_intf, "qt-accent-color" );
+        QColor color;
+        if( accent == nullptr || !strcmp( accent, "default" ) )
+            color = QColor( 0xFF, 0x88, 0x00 );
+        else if( strcmp( accent, "system" ) )
+            color = QColor( accent );
+        free( accent );
+
+        if( color.isValid() )
+        {
+            QPalette pal = QApplication::palette();
+            for( const auto group : { QPalette::Active, QPalette::Inactive } )
+            {
+                pal.setColor( group, QPalette::Highlight, color );
+                pal.setColor( group, QPalette::HighlightedText, Qt::black );
+                pal.setColor( group, QPalette::Link, color );
+#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
+                pal.setColor( group, QPalette::Accent, color );
+#endif
+            }
+            QApplication::setPalette( pal );
+        }
+    }
 
     /* Launch */
     app.exec();

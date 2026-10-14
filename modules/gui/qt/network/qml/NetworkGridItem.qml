@@ -19,6 +19,7 @@ import QtQuick
 import QtQml.Models
 
 import VLC.Widgets as Widgets
+import VLC.MainInterface
 import VLC.Network
 import VLC.Style
 import VLC.Util
@@ -61,7 +62,15 @@ Widgets.GridItem {
                             .uri()
     }
 
-    title: model.name || qsTr("Unknown share")
+    title: {
+        if (model.name)
+            return model.name
+        // A drive root has no name of its own: label it like the file manager does.
+        const drive = /^file:\/\/\/([A-Za-z]):\/?$/.exec(model.mrl?.toString() || "")
+        if (drive)
+            return qsTr("Local Disk (%1:)").arg(drive[1].toUpperCase())
+        return qsTr("Unknown share")
+    }
     subtitle: {
         // make sure subtitle is never empty otherwise it causes alignment issues
         const defaultTxt = "--"
@@ -74,6 +83,10 @@ Widgets.GridItem {
             || type === NetworkMediaModel.TYPE_PLAYLIST)
             && (mrl === "vlc://nop"))
             return defaultTxt
+
+        // Show local folders as a normal path (C:\Users\...) rather than a file:/// address.
+        if (mrl.startsWith("file://"))
+            return MainCtx.displayMRL(model.mrl) || mrl
 
         return mrl || defaultTxt
     }

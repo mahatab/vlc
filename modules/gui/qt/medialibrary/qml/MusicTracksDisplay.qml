@@ -95,7 +95,7 @@ Widgets.PageExt {
             anchors.centerIn: parent
             visible: !tracklistdisplay_id.model.loading && (tracklistdisplay_id.model.count <= 0)
             focus: visible
-            text: qsTr("No tracks found\nPlease try adding sources")
+            text: qsTr("No tracks yet\nAdd your music folder to fill your library")
             Navigation.parentItem: root
             cover: VLCStyle.noArtAlbumCover
         }

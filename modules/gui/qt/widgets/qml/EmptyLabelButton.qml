@@ -25,6 +25,8 @@ import VLC.Style
 import VLC.Widgets as Widgets
 import VLC.Util
 
+// Empty library view: the main action adds a folder to the library in one step;
+// "Browse" stays available for people who just want to look around.
 EmptyLabel {
     id: root
 
@@ -35,11 +37,18 @@ EmptyLabel {
     // Aliases
 
     property alias button: button
+    property alias browseButton: browseButton
 
     // Functions
 
     function onNavigate(reason) {
         History.push(["network"], reason)
+    }
+
+    function addFolder() {
+        // Falls back to Browse when this build has no media library.
+        if (!MainCtx.addFolderToLibrary() && !MainCtx.mediaLibraryAvailable)
+            onNavigate(Qt.OtherFocusReason)
     }
 
     // Keys
@@ -58,28 +67,50 @@ EmptyLabel {
 
         _keyPressed = false
 
-        if (KeyHelper.matchOk(event))
-            onNavigate(Qt.TabFocusReason)
+        if (KeyHelper.matchOk(event)) {
+            if (browseButton.activeFocus)
+                onNavigate(Qt.TabFocusReason)
+            else
+                addFolder()
+        }
 
         Navigation.defaultKeyReleaseAction(event)
     }
 
     // Children
 
-    Widgets.ButtonExt {
-        id: button
-
+    Row {
         anchors.horizontalCenter: parent.horizontalCenter
 
-        width: Math.max(VLCStyle.dp(84, VLCStyle.scale), implicitWidth)
+        spacing: VLCStyle.margin_small
 
-        focus: true
+        Widgets.ButtonExt {
+            id: button
 
-        text: qsTr("Browse")
-        iconTxt: VLCIcons.topbar_network
+            width: Math.max(VLCStyle.dp(120, VLCStyle.scale), implicitWidth)
 
-        Navigation.parentItem: root
+            focus: true
 
-        onClicked: onNavigate(Qt.OtherFocusReason)
+            text: qsTr("Add a folder")
+            iconTxt: VLCIcons.folder
+
+            Navigation.parentItem: root
+            Navigation.rightItem: browseButton
+
+            onClicked: root.addFolder()
+        }
+
+        Widgets.ButtonExt {
+            id: browseButton
+
+            width: Math.max(VLCStyle.dp(84, VLCStyle.scale), implicitWidth)
+
+            text: qsTr("Browse")
+
+            Navigation.parentItem: root
+            Navigation.leftItem: button
+
+            onClicked: root.onNavigate(Qt.OtherFocusReason)
+        }
     }
 }

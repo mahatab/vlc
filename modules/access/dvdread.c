@@ -108,6 +108,14 @@ static void DvdReadLog( void *foo, dvd_logger_level_t i, const char *p, va_list 
     msg_GenericVa( p_demux, i, p, z );
 }
 #endif
+/* Only interrupt the user when they explicitly asked for a disc (dvd:// or a
+ * forced demux). The ISO demuxer also probes ordinary files, where failing is
+ * expected and must not raise a "Playback failure" dialog. */
+static bool UserAskedForDisc( const demux_t *p_demux )
+{
+    return p_demux->s == NULL || p_demux->obj.force;
+}
+
 /*****************************************************************************
  * Open:
  *****************************************************************************/
@@ -201,8 +209,9 @@ int OpenCommonDvdread( vlc_object_t *p_this , dvd_type_t type,
     if( p_dvdread == NULL )
     {
         msg_Err( p_demux, "DVDRead cannot open source: %s", psz_file );
-        vlc_dialog_display_error( p_demux, _("Playback failure"),
-                      _("DVDRead could not open the disc \"%s\"."), psz_file );
+        if( UserAskedForDisc( p_demux ) )
+            vlc_dialog_display_error( p_demux, _("Playback failure"),
+                          _("DVDRead could not open the disc \"%s\"."), psz_file );
 
         free( psz_file );
         return VLC_EGENERIC;
@@ -217,8 +226,9 @@ int OpenCommonDvdread( vlc_object_t *p_this , dvd_type_t type,
         {
             if( DVDISOVolumeInfo( p_dvdread, rgsz_volid, 32, NULL, 0 ) == 0 )
             {
-                vlc_dialog_display_error( p_demux, _("Playback failure"),
-                              _("Cannot play a non-UDF mastered DVD." ) );
+                if( UserAskedForDisc( p_demux ) )
+                    vlc_dialog_display_error( p_demux, _("Playback failure"),
+                                  _("Cannot play a non-UDF mastered DVD." ) );
                 msg_Err( p_demux, "Invalid UDF DVD. (Found ISO9660 '%s')", rgsz_volid );
             }
         }

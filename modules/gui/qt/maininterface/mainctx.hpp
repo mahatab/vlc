@@ -410,6 +410,10 @@ public:
     Q_INVOKABLE QUrl folderMRL(const QString &fileMRL) const;
     Q_INVOKABLE QUrl folderMRL(const QUrl &fileMRL) const;
 
+    // Lets any view (empty states, first run) add a folder to the media library.
+    // Returns false when there is no media library or the user cancelled.
+    Q_INVOKABLE bool addFolderToLibrary();
+
     Q_INVOKABLE QString displayMRL(const QUrl &mrl) const;
 
     double artistAlbumsWidth() const;
