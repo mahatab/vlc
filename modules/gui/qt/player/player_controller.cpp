@@ -1811,6 +1811,33 @@ SharedAOut PlayerController::getAout()
 
 // Audio equalizer
 
+/* The equalizer only starts when "equalizer-bands" holds levels, so every
+ * preset change also stores that preset's ten band levels. */
+static QByteArray presetBands( int index )
+{
+    QStringList levels;
+    for( int i = 0; i < eqz_preset_10b[index].i_band; ++i )
+        levels << QString::number( eqz_preset_10b[index].f_amp[i], 'f', 1 );
+    return levels.join( ' ' ).toUtf8();
+}
+
+static void storeEqualizerPreset( audio_output_t *aout, int index )
+{
+    const QByteArray bands = presetBands( index );
+    config_PutPsz( "equalizer-preset", preset_list[index] );
+    config_PutPsz( "equalizer-bands", bands.constData() );
+    config_PutFloat( "equalizer-preamp", eqz_preset_10b[index].f_preamp );
+    if( aout )
+    {
+        var_Create( aout, "equalizer-bands", VLC_VAR_STRING | VLC_VAR_DOINHERIT );
+        var_Create( aout, "equalizer-preset", VLC_VAR_STRING | VLC_VAR_DOINHERIT );
+        var_Create( aout, "equalizer-preamp", VLC_VAR_FLOAT | VLC_VAR_DOINHERIT );
+        var_SetString( aout, "equalizer-bands", bands.constData() );
+        var_SetFloat( aout, "equalizer-preamp", eqz_preset_10b[index].f_preamp );
+        var_SetString( aout, "equalizer-preset", preset_list[index] );
+    }
+}
+
 QStringList PlayerController::equalizerPresetNames() const
 {
     QStringList names;
@@ -1866,22 +1893,17 @@ void PlayerController::setEqualizerEnabled( bool enable )
         list << QStringLiteral("equalizer");
     config_PutPsz( "audio-filter", qtu( list.join( ':' ) ) );
 
-    /* The equalizer refuses to start without a preset: begin from "flat". */
+    /* The equalizer refuses to start without band levels: make sure the
+     * current preset (or Flat) has its levels stored before enabling. */
     if( enable )
     {
-        char *preset = config_GetPsz( "equalizer-preset" );
-        if( !preset || !*preset )
+        char *bands = config_GetPsz( "equalizer-bands" );
+        if( !bands || !*bands )
         {
-            config_PutPsz( "equalizer-preset", "flat" );
-            if( SharedAOut aout = getAout() )
-            {
-                char *current = var_GetString( aout.get(), "equalizer-preset" );
-                if( !current || !*current )
-                    var_SetString( aout.get(), "equalizer-preset", "flat" );
-                free( current );
-            }
+            SharedAOut aout = getAout();
+            storeEqualizerPreset( aout.get(), equalizerPresetIndex() );
         }
-        free( preset );
+        free( bands );
     }
 
     vlc_player_aout_EnableFilter( d->m_player, "equalizer", enable );
@@ -1891,13 +1913,11 @@ void PlayerController::applyEqualizerPreset( int index )
 {
     if( index < 0 || index >= NB_PRESETS )
         return;
+
+    SharedAOut aout = getAout();
+    storeEqualizerPreset( aout.get(), index );
     if( !isEqualizerEnabled() )
         setEqualizerEnabled( true );
-
-    /* The equalizer applies the preset's levels itself when this changes. */
-    if( SharedAOut aout = getAout() )
-        var_SetString( aout.get(), "equalizer-preset", preset_list[index] );
-    config_PutPsz( "equalizer-preset", preset_list[index] );
 }
 
 void PlayerController::setVolume(float volume)
