@@ -184,40 +184,27 @@ TracksPage {
             color: root.colorContext.fg.primary
         }
 
+        // One compact row (switch, preset, more) so it fits the panel at any size.
         RowLayout {
             Layout.fillWidth: true
             Layout.topMargin: VLCStyle.margin_normal
 
-            spacing: VLCStyle.margin_xsmall
+            spacing: VLCStyle.margin_small
 
             Accessible.role: Accessible.Grouping
             Accessible.name: qsTr("Equalizer")
 
-            Widgets.MenuCaption {
-                Layout.fillWidth: true
-
-                text: qsTr("Shape the sound with a preset")
-
-                color: root.colorContext.fg.primary
-            }
-
             Widgets.CheckButton {
                 id: eqSwitch
 
+                text: qsTr("Equalizer on")
                 checked: Player.isEqualizerEnabled()
 
                 Navigation.parentItem: root
-                Navigation.downItem: eqPresets
+                Navigation.rightItem: eqPresets
 
                 onToggled: Player.setEqualizerEnabled(checked)
             }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.topMargin: VLCStyle.margin_xsmall
-
-            spacing: VLCStyle.margin_xsmall
 
             Widgets.ComboBoxExt {
                 id: eqPresets
@@ -228,12 +215,14 @@ TracksPage {
                 enabled: eqSwitch.checked
                 model: Player.equalizerPresetNames()
 
+                Accessible.name: qsTr("Equalizer preset")
+
                 Component.onCompleted: currentIndex = Player.equalizerPresetIndex()
 
                 onActivated: (index) => Player.applyEqualizerPreset(index)
 
                 Navigation.parentItem: root
-                Navigation.upItem: eqSwitch
+                Navigation.leftItem: eqSwitch
                 Navigation.rightItem: moreEffects
             }
 
