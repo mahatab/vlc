@@ -207,6 +207,10 @@ MainCtx::MainCtx(qt_intf_t *_p_intf)
     loadPrefs(false);
     loadFromSettingsImpl(false);
 
+    // the Minimal style always opens on plain lists
+    if (m_interfaceStyle == INTERFACE_STYLE_MINIMAL)
+        m_gridView = false;
+
     /* Get the available interfaces */
     m_extraInterfaces = new VLCVarChoiceModel(VLC_OBJECT(p_intf->intf), "intf-add", this);
 

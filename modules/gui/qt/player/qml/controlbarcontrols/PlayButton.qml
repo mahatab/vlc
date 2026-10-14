@@ -260,9 +260,10 @@ T.Control {
 
             radius: width / 2
 
+            // the Minimal style draws the ring in its charcoal accent
             gradient: Gradient {
-                GradientStop { position: 0.0; color: "#e25b01" }
-                GradientStop { position: 1.0; color: "#f89a06" }
+                GradientStop { position: 0.0; color: VLCStyle.isMinimal ? "#1d1d1b" : "#e25b01" }
+                GradientStop { position: 1.0; color: VLCStyle.isMinimal ? "#4a4740" : "#f89a06" }
             }
 
             Widgets.RoundedRectangleShadow {

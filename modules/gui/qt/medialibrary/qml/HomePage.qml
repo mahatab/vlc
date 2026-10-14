@@ -79,10 +79,10 @@ Widgets.PageExt {
         id: flickable
 
         implicitWidth: Math.max(coneNButtons.implicitWidth, mediaRows.implicitWidth)
-        implicitHeight: hero.height + coneNButtons.implicitHeight + (_hasMedias ? mediaRows.implicitHeight : 0)
+        implicitHeight: hero.height + greeting.height + coneNButtons.implicitHeight + (_hasMedias ? mediaRows.implicitHeight : 0)
 
         contentWidth: width
-        contentHeight: _hasMedias ? hero.height + coneNButtons.implicitHeight + mediaRows.implicitHeight
+        contentHeight: _hasMedias ? hero.height + greeting.height + coneNButtons.implicitHeight + mediaRows.implicitHeight
                                   : height - topMargin - bottomMargin
 
         flickableDirection: Flickable.AutoFlickIfNeeded
@@ -249,6 +249,38 @@ Widgets.PageExt {
             }
         }
 
+        // Windows 11 style: a friendly greeting above the buttons
+        Column {
+            id: greeting
+
+            anchors.top: hero.bottom
+            anchors.left: parent.left
+            anchors.leftMargin: newVideoRow.contentLeftMargin
+            anchors.right: parent.right
+
+            visible: VLCStyle.isFluent && flickable._hasMedias
+            height: visible ? implicitHeight + VLCStyle.margin_normal : 0
+            spacing: VLCStyle.margin_xxsmall
+
+            Text {
+                text: {
+                    const hour = new Date().getHours()
+                    if (hour < 5 || hour >= 18)
+                        return qsTr("Good evening")
+                    return hour < 12 ? qsTr("Good morning") : qsTr("Good afternoon")
+                }
+                color: theme.fg.primary
+                font.pixelSize: VLCStyle.dp(28)
+                font.weight: Font.DemiBold
+            }
+
+            Text {
+                text: qsTr("Pick up where you left off, or open something new.")
+                color: theme.fg.secondary
+                font.pixelSize: VLCStyle.fontSize_large
+            }
+        }
+
         NoMedialibHome.ConeNButtons {
             id: coneNButtons
 
@@ -257,7 +289,7 @@ Widgets.PageExt {
             orientation: flickable._hasMedias ? Qt.Horizontal : Qt.Vertical
 
             anchors.centerIn: flickable._hasMedias ? undefined : parent
-            anchors.top: flickable._hasMedias ? hero.bottom : undefined
+            anchors.top: flickable._hasMedias ? greeting.bottom : undefined
             anchors.left: flickable._hasMedias ? parent.left : undefined
             anchors.leftMargin: flickable._hasMedias ? newVideoRow.contentLeftMargin : 0
 

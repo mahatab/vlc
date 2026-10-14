@@ -103,9 +103,9 @@ FocusScope {
         Image {
             id: cone
 
-            // Minimal keeps the page to text and buttons, Cinematic lets the artwork speak
-            // (the big centered cone of an empty library stays in every style)
-            visible: VLCStyle.isFluent || coneNButtons.orientation === Qt.Vertical
+            // with media in the library the buttons stand on their own;
+            // the big centered cone stays for an empty library
+            visible: coneNButtons.orientation === Qt.Vertical
             width: visible ? implicitWidth : 0
             height: visible ? implicitHeight : 0
 
@@ -167,13 +167,44 @@ FocusScope {
 
                 text: qsTr("Open Disc")
 
+                // Windows 11 style: one accent button, the others quieter
+                colorContext.colorSet: VLCStyle.isFluent ? ColorContext.ButtonStandard : ColorContext.ButtonAccent
+
                 // NOTE: Use the same width for the buttons (give more width if necessary) to have bilateral symmetry:
                 width: Math.max(fileButton.implicitWidth, discButton.implicitWidth)
 
                 Navigation.parentItem: coneNButtons
                 Navigation.leftItem: fileButton
+                Navigation.rightItem: folderButton.visible ? folderButton : null
 
                 onClicked: DialogsProvider.openDiscDialog()
+            }
+
+            Widgets.ButtonExt {
+                id: folderButton
+
+                visible: VLCStyle.isFluent && MainCtx.mediaLibraryAvailable
+
+                text: qsTr("Add a folder")
+
+                Navigation.parentItem: coneNButtons
+                Navigation.leftItem: discButton
+                Navigation.rightItem: networkButton.visible ? networkButton : null
+
+                onClicked: MainCtx.addFolderToLibrary()
+            }
+
+            Widgets.ButtonExt {
+                id: networkButton
+
+                visible: VLCStyle.isFluent
+
+                text: qsTr("Network stream")
+
+                Navigation.parentItem: coneNButtons
+                Navigation.leftItem: folderButton.visible ? folderButton : discButton
+
+                onClicked: DialogsProvider.openNetDialog()
             }
         }
     }
