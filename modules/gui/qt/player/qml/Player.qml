@@ -679,10 +679,10 @@ FocusScope {
                             Binding on visible {
                                 delayed: true
                                 when: titleLabel.componentCompleted
-                                value: Player.title.length > 0 && centerContent.height > (titleLabel.y + titleLabel.height)
+                                value: titleLabel.text.length > 0 && centerContent.height > (titleLabel.y + titleLabel.height)
                             }
 
-                            text: Player.title
+                            text: Player.title || Player.name
                             elide: Text.ElideRight
                             font.pixelSize: VLCStyle.fontSize_xxlarge
                             font.weight: Font.DemiBold

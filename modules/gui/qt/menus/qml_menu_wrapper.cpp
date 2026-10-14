@@ -788,6 +788,12 @@ void QmlAudioMenu::beforePopup(QMenu * menu) /* override */
     {
         emit triggered(Synchronize);
     });
+
+    // The audio page also holds the equalizer: give it a name people look for.
+    menu->addAction(qtr("Equalizer"), this, [this]()
+    {
+        emit triggered(Synchronize);
+    });
 }
 
 QmlAudioContextMenu::QmlAudioContextMenu(QObject *parent)
